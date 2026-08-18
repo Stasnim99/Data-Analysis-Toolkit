@@ -46,4 +46,4 @@ Plain HTML, CSS, and vanilla JavaScript, with no frameworks or external librarie
 
 ## About
 
-A quick reference field guide for deciding between R Studio, Python, SQL, Power BI, Tableau, and Excel (and for explaining that choice to someone else). Built as a companion piece to other data focused write ups in this portfolio.
+A quick reference field guide for deciding between R Studio, Python, SQL, Power BI, Tableau, and Excel (and for explaining that choice to someone else). 
