@@ -4,16 +4,6 @@ A single page guide comparing six data analysis tools analysts run into day to d
 
 **Live site:** https://stasnim99.github.io/Data-Analysis-Toolkit/
 
-## Preview
-
-![Overview and comparison chart](overview-and-comparison.png)
-
-![The tools, up close](tools.png)
-
-![Which one should you actually open](decision-guide.png)
-
-![Workflow and best practices](workflow-and-practices.png)
-
 ## Contents
 
 - `index.html`: the entire site. HTML, CSS, and JavaScript in one self contained file. Open it directly in a browser, no server or build step needed.
