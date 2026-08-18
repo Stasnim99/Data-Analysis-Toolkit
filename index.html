@@ -1,0 +1,677 @@
+<!--
+  Data Analysis Toolkit: R Studio, Python, SQL, Power BI, Tableau, and Excel Advanced
+  =====================================================================================
+  Single page guide comparing six commonly used data analysis tools: R Studio,
+  Python, SQL, Power BI, Tableau, and Advanced Excel. Covers what each tool is
+  good at, a scored comparison chart, a "when to use what" decision guide, a
+  stage by stage view of the data analysis lifecycle, and general best
+  practices. Everything (HTML, CSS, JS) lives in this one file on purpose, so
+  it opens straight from the desktop with no build step and no external
+  libraries.
+
+  The 1 to 5 ratings in the comparison chart are the author's own judgment
+  calls, informed by common usage patterns and each vendor's own
+  documentation (see Sources at the bottom), not a formal benchmark. Treat
+  them as a starting point for discussion, not a scorecard.
+
+  Last updated: August 10, 2026.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Data Analysis Software Guide: R Studio, Python, SQL, Power BI, Tableau, and Excel</title>
+<style>
+  /* off white base + one hue per tool, used consistently everywhere */
+  :root{
+    --bg: #f9f9f7;
+    --panel: #ffffff;
+    --ink: #0b0b0b;
+    --muted: #6b6b6b;
+    --line: #e7e3dd;
+    --accent: #2a78d6;
+    --accent-dark: #184f95;
+    --accent-soft: #dbe9fb;
+    --good: #0ca30c;
+    --r-color: #2a78d6;      /* R Studio: categorical slot 1 */
+    --pbi-color: #eb6834;    /* Power BI: categorical slot 2 */
+    --xl-color: #1baf7a;     /* Excel: categorical slot 3 */
+    --py-color: #eda100;     /* Python: categorical slot 4 */
+    --sql-color: #e87ba4;    /* SQL: categorical slot 5 */
+    --tab-color: #008300;    /* Tableau: categorical slot 6 */
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.05);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height:1.55;
+  }
+  a{color:var(--accent-dark);}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px;}
+
+  header.site{
+    background: linear-gradient(180deg, #ffffff 0%, #f9f9f7 100%);
+    border-bottom:1px solid var(--line);
+    padding:14px 0;
+    position:sticky;
+    top:0;
+    z-index:50;
+    backdrop-filter: blur(6px);
+  }
+  header.site .bar{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.05rem;}
+  .brand .dot{width:12px;height:12px;border-radius:50%;background:var(--accent);display:inline-block;}
+  nav.links{display:flex; gap:16px; flex-wrap:wrap; font-size:0.9rem;}
+  nav.links a{text-decoration:none; color:var(--muted); font-weight:600;}
+  nav.links a:hover{color:var(--accent-dark);}
+
+  .hero{padding:56px 0 34px;}
+  .kicker{
+    display:inline-block;
+    background:var(--accent-soft);
+    color:var(--accent-dark);
+    font-weight:700;
+    font-size:0.78rem;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding:5px 12px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  h1{font-size:2.3rem; margin:0 0 12px; line-height:1.15;}
+  .lede{font-size:1.1rem; color:#444; max-width:70ch; margin:0 0 8px;}
+  .asof{color:var(--muted); font-size:0.88rem;}
+
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+    gap:14px;
+    margin:32px 0 12px;
+  }
+  .stat{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    box-shadow:var(--shadow);
+  }
+  .stat .num{font-size:1.7rem; font-weight:800; color:var(--accent-dark);}
+  .stat .label{font-size:0.82rem; color:var(--muted); margin-top:4px;}
+
+  section{padding:44px 0; border-top:1px solid var(--line);}
+  section h2{font-size:1.5rem; margin:0 0 6px;}
+  section .subhead{color:var(--muted); margin:0 0 24px; max-width:70ch;}
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:24px;
+  }
+
+  /* comparison chart: grouped horizontal bars, one row per criterion, one bar per tool */
+  .chart-layout{display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start;}
+  .chart{flex:2; min-width:320px; display:flex; flex-direction:column; gap:18px;}
+  .crit-row .crit-label{font-size:0.86rem; font-weight:700; color:#333; margin-bottom:8px;}
+  .crit-bars{display:flex; flex-direction:column; gap:6px;}
+  .bar-track{display:flex; align-items:center; gap:10px;}
+  .bar-tool{width:76px; font-size:0.72rem; color:var(--muted); text-align:right; flex-shrink:0;}
+  .bar-outer{flex:1; background:#f1efe9; border-radius:6px; height:16px; position:relative;}
+  .bar-fill{height:100%; border-radius:6px 4px 4px 6px; display:flex; align-items:center;}
+  .bar-fill .val{margin-left:auto; padding-right:6px; font-size:0.72rem; font-weight:700; color:#fff;}
+  .bar-fill.low .val{color:#333; margin-left:8px; padding-right:0;}
+
+  .chart-side{flex:1; min-width:230px;}
+  .legend{display:flex; flex-direction:column; gap:8px; margin-bottom:18px;}
+  .legend-row{display:flex; align-items:center; gap:10px; font-size:0.86rem; color:#444;}
+  .swatch{width:16px;height:16px;border-radius:4px; border:1px solid rgba(0,0,0,0.08); flex-shrink:0;}
+  #tooltip{
+    min-height:78px;
+    background:#f5f8fc;
+    border:1px dashed var(--accent-soft);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:0.88rem;
+    color:#444;
+  }
+  #tooltip b{color:var(--accent-dark);}
+
+  table{width:100%; border-collapse:collapse; font-size:0.92rem;}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);}
+  th{color:var(--muted); font-weight:700; font-size:0.78rem; text-transform:uppercase; letter-spacing:.03em;}
+  tr:last-child td{border-bottom:none;}
+  td.tool{font-weight:700;}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;}
+  .grid-auto{display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px;}
+  @media (max-width:820px){ .grid-3{grid-template-columns:1fr;} }
+  @media (max-width:720px){ .grid-2{grid-template-columns:1fr;} }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:var(--shadow);
+  }
+  .card.tool-card{border-top:4px solid var(--accent);}
+  .card h3{margin:0 0 4px; font-size:1.05rem;}
+  .card .tag{font-size:0.76rem; color:var(--muted); margin-bottom:12px; display:block;}
+  .card ul{margin:8px 0 0; padding-left:20px; color:#444;}
+  .card li{margin-bottom:6px;}
+
+  .callout{
+    background:#f2f7f3;
+    border:1px solid #d7e8db;
+    border-left:4px solid var(--good);
+    border-radius:10px;
+    padding:16px 18px;
+    color:#2c4a3a;
+    font-size:0.95rem;
+  }
+
+  /* lifecycle steps */
+  .lifecycle{display:flex; gap:0; flex-wrap:wrap; margin-top:8px;}
+  .step{
+    flex:1;
+    min-width:150px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    box-shadow:var(--shadow);
+    position:relative;
+  }
+  .step .n{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:50%;
+    background:var(--accent-soft); color:var(--accent-dark);
+    font-weight:800; font-size:0.82rem; margin-bottom:10px;
+  }
+  .step h4{margin:0 0 6px; font-size:0.95rem;}
+  .step p{margin:0 0 10px; font-size:0.82rem; color:#555;}
+  .step .tools{display:flex; gap:6px; flex-wrap:wrap;}
+  .step .tools span{font-size:0.68rem; font-weight:700; padding:3px 8px; border-radius:999px;}
+  .arrow{display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:1.3rem; padding:0 4px;}
+  @media (max-width:900px){ .lifecycle{flex-direction:column;} .arrow{transform:rotate(90deg); padding:6px 0;} }
+
+  .sources ol{padding-left:20px; color:#444;}
+  .sources li{margin-bottom:10px;}
+
+  footer{
+    padding:30px 0 60px;
+    color:var(--muted);
+    font-size:0.82rem;
+    border-top:1px solid var(--line);
+  }
+  footer .disclaimer{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-bottom:16px;
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <div class="brand"><span class="dot"></span> Data Analysis Toolkit</div>
+    <nav class="links">
+      <a href="#stats">Overview</a>
+      <a href="#compare">Comparison</a>
+      <a href="#tools">The Tools</a>
+      <a href="#decision">Which One?</a>
+      <a href="#lifecycle">Workflow</a>
+      <a href="#practices">Best Practices</a>
+      <a href="#sources">Sources</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero wrap">
+  <span class="kicker">Analyst's field guide</span>
+  <h1>Six Data Analysis Tools, and When to Use Each One</h1>
+  <p class="lede">Most data analysis work doesn't fail because of the wrong answer. It fails because of the wrong tool for the question. This guide walks through what R Studio, Python, SQL, Power BI, Tableau, and Advanced Excel are each actually good at, when to reach for one over the other, and how they fit together across a typical analysis project.</p>
+  <p class="asof">Written from a working analyst's perspective, drawing on each vendor's own documentation. Ratings and recommendations reflect common usage patterns, not a formal benchmark. See <a href="#sources">Sources</a> below.</p>
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="num">6</div><div class="label">Tools compared</div></div>
+    <div class="stat"><div class="num">6</div><div class="label">Evaluation criteria</div></div>
+    <div class="stat"><div class="num">6</div><div class="label">Stages in a typical analysis</div></div>
+    <div class="stat"><div class="num">$0</div><div class="label">Cost to start with R Studio, Python, or Power BI</div></div>
+  </div>
+</div>
+
+<!-- grouped bar comparison: #chartBody is generated by the script from the `criteria` array -->
+<section id="compare">
+  <div class="wrap">
+    <h2>How the tools stack up</h2>
+    <p class="subhead">A rough, opinionated scoring of each tool across six criteria that matter most in day to day analysis work. Higher is better on every axis. No tool wins across the board. That's the point: they're built for different jobs.</p>
+
+    <div class="panel chart-layout">
+      <div class="chart" id="chartBody"></div>
+      <div class="chart-side">
+        <div class="legend">
+          <div class="legend-row"><span class="swatch" style="background:var(--r-color)"></span> R Studio</div>
+          <div class="legend-row"><span class="swatch" style="background:var(--py-color)"></span> Python</div>
+          <div class="legend-row"><span class="swatch" style="background:var(--sql-color)"></span> SQL</div>
+          <div class="legend-row"><span class="swatch" style="background:var(--pbi-color)"></span> Power BI</div>
+          <div class="legend-row"><span class="swatch" style="background:var(--tab-color)"></span> Tableau</div>
+          <div class="legend-row"><span class="swatch" style="background:var(--xl-color)"></span> Excel (Advanced)</div>
+        </div>
+        <div id="tooltip">Hover a bar for a one line take on that score.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- deep dive cards on each tool -->
+<section id="tools">
+  <div class="wrap">
+    <h2>The tools, up close</h2>
+    <p class="subhead">What each one is, where it's built to excel, and where it tends to struggle.</p>
+
+    <div class="grid-3">
+      <div class="card tool-card" style="border-top-color:var(--r-color)">
+        <h3>R Studio (R)</h3>
+        <span class="tag">Free and open source statistical programming environment</span>
+        <ul>
+          <li><strong>Best for:</strong> statistical modeling, hypothesis testing, machine learning, custom or publication quality visualization, reproducible reporting</li>
+          <li>Full scripting language: every step is written code, so an analysis can be rerun exactly, version controlled, and peer reviewed</li>
+          <li>Massive ecosystem of packages (CRAN) for nearly any statistical method, from t tests to Bayesian models to survival analysis</li>
+          <li>R Markdown / Quarto let you combine code, output, and narrative into one reproducible report or slide deck</li>
+          <li>Steeper learning curve: requires comfort with code, and error messages are less forgiving than a spreadsheet</li>
+          <li>Not built for point and click business dashboards or easy sharing with stakeholders who don't code</li>
+        </ul>
+      </div>
+      <div class="card tool-card" style="border-top-color:var(--py-color)">
+        <h3>Python</h3>
+        <span class="tag">General purpose programming language with a huge data science ecosystem</span>
+        <ul>
+          <li><strong>Best for:</strong> statistical modeling, machine learning, automation, messy or very large datasets, and building pipelines that don't stop at analysis</li>
+          <li>Libraries like pandas, NumPy, scikit learn, and statsmodels cover everything from cleaning data to predictive modeling</li>
+          <li>Jupyter notebooks combine code, output, and narrative for exploratory work, in much the same spirit as R Markdown</li>
+          <li>The same language can clean data, run the analysis, build a model, and put it into production, so nothing has to be rebuilt in another tool later</li>
+          <li>Requires comfort with code, and a bit more setup for beginners than R Studio's all in one environment</li>
+          <li>Not built for point and click dashboards; sharing an interactive result with people who don't code usually means pairing it with another tool</li>
+        </ul>
+      </div>
+      <div class="card tool-card" style="border-top-color:var(--sql-color)">
+        <h3>SQL</h3>
+        <span class="tag">The standard language for querying and managing data inside databases</span>
+        <ul>
+          <li><strong>Best for:</strong> pulling exactly the data you need out of a database, joining across tables, and aggregating at scale before analysis even starts</li>
+          <li>Every major database (PostgreSQL, MySQL, SQL Server, Snowflake, BigQuery, and more) speaks some dialect of SQL</li>
+          <li>Handles millions or billions of rows far more efficiently than pulling everything into a spreadsheet or script first</li>
+          <li>Saved queries are easy to version, schedule, and reuse, which makes SQL a strong foundation for repeatable reporting</li>
+          <li>It's a querying language, not an analysis or visualization tool. SQL usually feeds R, Python, Power BI, Tableau, or Excel rather than replacing them</li>
+          <li>Basic statistics are possible with window functions, but real modeling belongs in R or Python</li>
+        </ul>
+      </div>
+      <div class="card tool-card" style="border-top-color:var(--pbi-color)">
+        <h3>Power BI</h3>
+        <span class="tag">Microsoft's self service business intelligence and dashboarding platform</span>
+        <ul>
+          <li><strong>Best for:</strong> interactive dashboards, recurring business reporting, blending multiple data sources, sharing live visuals with a team</li>
+          <li>Power Query gives a no code (or low code M language) way to clean and reshape data before it ever hits a visual</li>
+          <li>DAX (Data Analysis Expressions) supports genuinely sophisticated calculations once you're past basic aggregation</li>
+          <li>Reports refresh on a schedule and stay interactive for viewers: filter, drill down, slice by date, all without touching the underlying file</li>
+          <li>Sharing at scale, beyond your own desktop, requires a Pro or Premium license</li>
+          <li>Less suited to open ended statistical exploration or one time ad hoc analysis than R, Python, or Excel</li>
+        </ul>
+      </div>
+      <div class="card tool-card" style="border-top-color:var(--tab-color)">
+        <h3>Tableau</h3>
+        <span class="tag">A dedicated visual analytics and dashboarding platform</span>
+        <ul>
+          <li><strong>Best for:</strong> polished, highly interactive dashboards and exploring data visually by dragging fields onto a canvas</li>
+          <li>Widely considered a benchmark for visual, drag and drop exploration of data, especially at larger organizations</li>
+          <li>Connects live to databases, spreadsheets, and cloud sources, so dashboards can reflect current data without a manual export</li>
+          <li>Tableau Prep handles data shaping without writing code, similar in purpose to Power Query</li>
+          <li>Licensing typically costs more than Power BI, with a full featured desktop app that isn't free for commercial use</li>
+          <li>Not built for statistical modeling. Deeper analysis is usually done in R or Python first, then visualized in Tableau</li>
+        </ul>
+      </div>
+      <div class="card tool-card" style="border-top-color:var(--xl-color)">
+        <h3>Excel (Advanced)</h3>
+        <span class="tag">The spreadsheet everyone already has and already knows</span>
+        <ul>
+          <li><strong>Best for:</strong> quick ad hoc analysis, small to medium datasets, pivot tables, one time calculations, sharing a file with someone who has no other tool installed</li>
+          <li>Advanced features such as Power Query, Power Pivot, dynamic arrays (XLOOKUP, FILTER, SUMIFS), and PivotTables go far beyond basic spreadsheeting</li>
+          <li>Lowest barrier to entry: almost every analyst, manager, and client already has it and can open what you send</li>
+          <li>Fastest tool for a quick look at a dataset under a few hundred thousand rows</li>
+          <li>Manual steps are easy to get wrong and hard to audit: a single dragged formula or hidden filter can quietly break a whole analysis</li>
+          <li>Struggles with large datasets, complex statistics, and true reproducibility without heavy use of VBA macros</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- decision guide: scenario cards mapped to the right tool -->
+<section id="decision">
+  <div class="wrap">
+    <h2>Which one should you actually open?</h2>
+    <p class="subhead">A practical way to decide: start from what you're trying to do, not which tool you already have a shortcut to.</p>
+    <div class="grid-auto">
+      <div class="card">
+        <h3>Reach for R Studio when…</h3>
+        <ul>
+          <li>You need a statistical test, a regression, a model, or a forecast, not just a chart</li>
+          <li>The analysis needs to be reproducible: rerun it next month on new data with one click</li>
+          <li>You're working with messy or oddly shaped data that a spreadsheet can't handle cleanly</li>
+          <li>The output is a report or paper with custom, publication quality figures</li>
+          <li>You want full control over every transformation, with an audit trail in code</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Reach for Python when…</h3>
+        <ul>
+          <li>You need machine learning, deep learning, or advanced modeling beyond a specific statistical package</li>
+          <li>The analysis needs to plug into a larger software system, an API, or a production pipeline</li>
+          <li>You're automating a repeatable task across many files or data sources</li>
+          <li>Your team already codes in Python for other work, so staying in one language matters more than a specialist tool</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Reach for SQL when…</h3>
+        <ul>
+          <li>The data lives in a database and you need to filter, join, or aggregate it before real analysis can begin</li>
+          <li>The dataset is too large to reasonably load into Excel, or even into memory, without narrowing it down first</li>
+          <li>You need a fast, repeatable way to pull the same slice of data on a recurring basis</li>
+          <li>Another tool (Power BI, Tableau, R, Python, Excel) is going to consume the result, not you directly</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Reach for Power BI when…</h3>
+        <ul>
+          <li>Multiple people need to explore the same live numbers, not a static export</li>
+          <li>The report needs to update on a schedule as new data lands</li>
+          <li>You're combining data from several sources (a database, a spreadsheet, an API) into one view</li>
+          <li>Stakeholders want to filter, drill down, and slice the data themselves</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Reach for Tableau when…</h3>
+        <ul>
+          <li>The priority is visual exploration and a polished, highly interactive dashboard</li>
+          <li>Your organization already has Tableau licenses and a BI team built around it</li>
+          <li>You want viewers to explore their own view of the data without needing to learn DAX or M</li>
+          <li>You're presenting to a large, visually oriented audience where dashboard polish matters as much as the numbers</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Reach for Excel when…</h3>
+        <ul>
+          <li>You need an answer in the next ten minutes, not after setting anything up</li>
+          <li>The dataset is small enough to eyeball and the questions are straightforward (sums, counts, a quick pivot)</li>
+          <li>You're sharing a file with someone who has no other analytics tool installed</li>
+          <li>The task is a one time calculation, not something you'll need to repeat</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Reach for more than one when…</h3>
+        <ul>
+          <li>You pull and filter data with SQL, model it in R or Python, then hand a clean summary table to Power BI or Tableau for the dashboard stakeholders actually use</li>
+          <li>You shape data in Power Query or Tableau Prep, then export it for deeper statistical work in R or Python</li>
+          <li>You prototype an analysis quickly in Excel, then rebuild it properly once it proves useful</li>
+          <li>This is the most common real world pattern. Treat the tools as a pipeline, not a single choice</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- the six stage data analysis lifecycle, each stage tagged with the tool(s) that tend to fit -->
+<section id="lifecycle">
+  <div class="wrap">
+    <h2>Where each tool fits in the analysis workflow</h2>
+    <p class="subhead">A typical analysis moves through the same six stages regardless of tool. Most projects actually use more than one tool along the way.</p>
+    <div class="lifecycle" id="lifecycleBody"></div>
+  </div>
+</section>
+
+<!-- general, tool agnostic best practices for data analysis work -->
+<section id="practices">
+  <div class="wrap">
+    <h2>Best practices that apply no matter the tool</h2>
+    <p class="subhead">The software matters less than the habits around it. These hold whether you're in R, Python, SQL, Power BI, Tableau, Excel, or something else entirely.</p>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Start with the question, not the tool</h3>
+        <ul>
+          <li>Write down what decision the analysis needs to support before opening anything</li>
+          <li>Let the question dictate the tool. A dashboard question points to Power BI or Tableau; a "is this difference real?" question points to R or Python</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Understand your data before you analyze it</h3>
+        <ul>
+          <li>Check for missing values, duplicate records, and inconsistent categories first</li>
+          <li>Know where the data came from and what it does and doesn't measure. A clean looking number can still be the wrong number</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Make the analysis repeatable</h3>
+        <ul>
+          <li>Prefer scripted steps (R or Python code, SQL queries, Power Query, documented formulas) over manual, one time clicks you won't remember later</li>
+          <li>If you can't rerun last month's analysis on this month's data in under a few minutes, it isn't finished</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Match the visual to the audience</h3>
+        <ul>
+          <li>Executives usually want one headline number and a trend; analysts want the full breakdown</li>
+          <li>A chart that requires a paragraph of explanation is usually the wrong chart</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Show your work</h3>
+        <ul>
+          <li>Document assumptions, filters, and exclusions directly alongside the analysis, not in a separate note that only lives in your memory</li>
+          <li>Someone else, including future you, should be able to see exactly how a number was produced</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Know the tool's limits</h3>
+        <ul>
+          <li>A spreadsheet doing 10,000 nested lookups is a warning sign, not a workflow</li>
+          <li>If you're fighting the tool more than the problem, it's usually a sign to switch tools, not push harder</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- reference links -->
+<section id="sources">
+  <div class="wrap sources">
+    <h2>Sources &amp; further reading</h2>
+    <p class="subhead">Official documentation for each tool, plus general references on the data analysis process. The comparison ratings above reflect the author's synthesis of these sources and hands on use, not a formal study.</p>
+    <div class="panel">
+      <ol>
+        <li><a href="https://posit.co/products/open-source/rstudio/" target="_blank" rel="noopener">Posit: RStudio IDE overview</a></li>
+        <li><a href="https://cran.r-project.org/manuals.html" target="_blank" rel="noopener">The R Project: Official manuals and documentation</a></li>
+        <li><a href="https://docs.python.org/3/" target="_blank" rel="noopener">Python Software Foundation: Official Python documentation</a></li>
+        <li><a href="https://pandas.pydata.org/docs/" target="_blank" rel="noopener">pandas: Official documentation</a></li>
+        <li><a href="https://www.postgresql.org/docs/" target="_blank" rel="noopener">PostgreSQL: Official documentation (a widely used SQL database)</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/power-bi/fundamentals/power-bi-overview" target="_blank" rel="noopener">Microsoft Learn: Power BI overview</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/power-query/power-query-what-is-power-query" target="_blank" rel="noopener">Microsoft Learn: What is Power Query</a></li>
+        <li><a href="https://help.tableau.com/current/guides/get-started-tutorial/en-us/get-started-tutorial-home.htm" target="_blank" rel="noopener">Tableau: Getting started guide</a></li>
+        <li><a href="https://support.microsoft.com/en-us/excel" target="_blank" rel="noopener">Microsoft Support: Excel help and learning</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/office/dev/add-ins/excel/excel-add-ins-vba" target="_blank" rel="noopener">Microsoft Learn: Excel VBA overview</a></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="disclaimer">
+      <strong>A note on the ratings:</strong> The 1 to 5 scores in the comparison chart are a working analyst's judgment call meant to guide decisions, not a benchmark study. Your mileage will vary by dataset size, team skill, and organizational licensing. When in doubt, prototype the analysis in whichever tool is fastest to try, and switch if it starts fighting you.
+    </div>
+    A static reference page, last compiled on August 10, 2026.
+  </div>
+</footer>
+
+<script>
+  // ---- comparison chart data ----------------------------------------------
+  // score: 1 to 5, higher is better. note: a short hover explanation for that score.
+  const criteria = [
+    {
+      label: "Ease of Use / Learning Curve",
+      scores: [
+        {tool:"R Studio", key:"r", score:2, note:"Requires learning a programming language; one of the steeper curves in this set"},
+        {tool:"Python", key:"py", score:2, note:"Similar curve to R; a bit easier if you already know general purpose programming"},
+        {tool:"SQL", key:"sql", score:3, note:"Core syntax is quick to pick up; advanced window functions take longer"},
+        {tool:"Power BI", key:"pbi", score:4, note:"Drag and drop visuals are approachable; DAX adds a learning curve for advanced use"},
+        {tool:"Tableau", key:"tab", score:4, note:"Drag and drop interface is approachable, similar to Power BI"},
+        {tool:"Excel", key:"xl", score:5, note:"Nearly everyone already knows the basics"}
+      ]
+    },
+    {
+      label: "Statistical & Advanced Analytics",
+      scores: [
+        {tool:"R Studio", key:"r", score:5, note:"Purpose built for statistics, modeling, and machine learning"},
+        {tool:"Python", key:"py", score:5, note:"Extremely strong ecosystem for statistics, machine learning, and deep learning"},
+        {tool:"SQL", key:"sql", score:2, note:"Aggregates and window functions only; not built for modeling"},
+        {tool:"Power BI", key:"pbi", score:3, note:"DAX handles solid business calculations; not a statistics engine"},
+        {tool:"Tableau", key:"tab", score:2, note:"Basic trend lines and forecasting; not a statistics engine"},
+        {tool:"Excel", key:"xl", score:2, note:"Basic stats functions exist, but formulas get unwieldy fast"}
+      ]
+    },
+    {
+      label: "Interactive Dashboards & BI Reporting",
+      scores: [
+        {tool:"R Studio", key:"r", score:3, note:"Possible via Shiny, but requires real development effort"},
+        {tool:"Python", key:"py", score:3, note:"Possible with Dash or Streamlit, but also requires real development effort"},
+        {tool:"SQL", key:"sql", score:1, note:"SQL itself produces no visuals; it feeds the tool that does"},
+        {tool:"Power BI", key:"pbi", score:5, note:"Purpose built for exactly this"},
+        {tool:"Tableau", key:"tab", score:5, note:"Often considered the category leader for interactive visual dashboards"},
+        {tool:"Excel", key:"xl", score:3, note:"PivotCharts and slicers work, but don't scale to true BI dashboards"}
+      ]
+    },
+    {
+      label: "Automation & Reproducibility",
+      scores: [
+        {tool:"R Studio", key:"r", score:5, note:"Every step is code: rerun it exactly, forever, on new data"},
+        {tool:"Python", key:"py", score:5, note:"Scripts and notebooks make every step rerunnable and easy to version"},
+        {tool:"SQL", key:"sql", score:4, note:"Saved queries are easy to schedule and reuse, though logic can be scattered across many of them"},
+        {tool:"Power BI", key:"pbi", score:4, note:"Power Query steps and scheduled refresh make most pipelines repeatable"},
+        {tool:"Tableau", key:"tab", score:3, note:"Tableau Prep adds repeatable data shaping; less scriptable than code or Power Query"},
+        {tool:"Excel", key:"xl", score:2, note:"Manual steps are easy to forget or do slightly differently next time"}
+      ]
+    },
+    {
+      label: "Handling Large / Complex Datasets",
+      scores: [
+        {tool:"R Studio", key:"r", score:5, note:"Handles millions of rows and complex joins comfortably"},
+        {tool:"Python", key:"py", score:5, note:"Scales from a laptop to distributed processing with the right libraries"},
+        {tool:"SQL", key:"sql", score:5, note:"Databases are built for exactly this; comfortably handles billions of rows"},
+        {tool:"Power BI", key:"pbi", score:4, note:"Its data model is built for large datasets spanning many tables"},
+        {tool:"Tableau", key:"tab", score:4, note:"Connects live to large databases rather than loading everything into memory"},
+        {tool:"Excel", key:"xl", score:2, note:"Performance and row limits become real problems past a few hundred thousand rows"}
+      ]
+    },
+    {
+      label: "Cost & Accessibility",
+      scores: [
+        {tool:"R Studio", key:"r", score:5, note:"Free and open source, no licensing required to start"},
+        {tool:"Python", key:"py", score:5, note:"Free and open source, with a huge free learning ecosystem"},
+        {tool:"SQL", key:"sql", score:4, note:"Many free database engines exist; enterprise platforms can be costly"},
+        {tool:"Power BI", key:"pbi", score:3, note:"Desktop is free; sharing broadly requires a Pro or Premium license"},
+        {tool:"Tableau", key:"tab", score:2, note:"Desktop licensing is a real cost for most organizations; the Public version is free but limited"},
+        {tool:"Excel", key:"xl", score:4, note:"Usually already included with an existing Office license"}
+      ]
+    }
+  ];
+
+  const colorFor = {r:"var(--r-color)", py:"var(--py-color)", sql:"var(--sql-color)", pbi:"var(--pbi-color)", tab:"var(--tab-color)", xl:"var(--xl-color)"};
+  const chartBody = document.getElementById('chartBody');
+  const tooltip = document.getElementById('tooltip');
+
+  criteria.forEach(crit => {
+    const row = document.createElement('div');
+    row.className = 'crit-row';
+    const label = document.createElement('div');
+    label.className = 'crit-label';
+    label.textContent = crit.label;
+    row.appendChild(label);
+
+    const bars = document.createElement('div');
+    bars.className = 'crit-bars';
+
+    crit.scores.forEach(s => {
+      const track = document.createElement('div');
+      track.className = 'bar-track';
+
+      const toolLabel = document.createElement('div');
+      toolLabel.className = 'bar-tool';
+      toolLabel.textContent = s.tool;
+      track.appendChild(toolLabel);
+
+      const outer = document.createElement('div');
+      outer.className = 'bar-outer';
+
+      const fill = document.createElement('div');
+      fill.className = 'bar-fill' + (s.score <= 2 ? ' low' : '');
+      fill.style.width = (s.score / 5 * 100) + '%';
+      fill.style.background = colorFor[s.key];
+
+      const val = document.createElement('span');
+      val.className = 'val';
+      val.textContent = s.score;
+      fill.appendChild(val);
+
+      outer.appendChild(fill);
+      outer.addEventListener('mouseenter', () => {
+        tooltip.innerHTML = `<b>${s.tool}: ${crit.label}</b><br>Score: ${s.score} of 5. ${s.note}`;
+      });
+      track.appendChild(outer);
+      bars.appendChild(track);
+    });
+
+    row.appendChild(bars);
+    chartBody.appendChild(row);
+  });
+
+  // ---- lifecycle steps -----------------------------------------------------
+  const stages = [
+    {n:1, title:"Collect & Import", desc:"Pull data from files, databases, or APIs into a working environment.", tools:[{k:"r",t:"R Studio"},{k:"py",t:"Python"},{k:"sql",t:"SQL"},{k:"pbi",t:"Power BI"},{k:"xl",t:"Excel"}]},
+    {n:2, title:"Clean & Prepare", desc:"Fix missing values, duplicates, and inconsistent formats before trusting any number.", tools:[{k:"r",t:"R Studio"},{k:"py",t:"Python"},{k:"pbi",t:"Power Query"}]},
+    {n:3, title:"Explore (EDA)", desc:"Look for patterns, outliers, and relationships before committing to a method.", tools:[{k:"r",t:"R Studio"},{k:"py",t:"Python"},{k:"xl",t:"Excel"}]},
+    {n:4, title:"Analyze / Model", desc:"Run the statistics, test, or model that actually answers the question.", tools:[{k:"r",t:"R Studio"},{k:"py",t:"Python"}]},
+    {n:5, title:"Visualize", desc:"Turn results into a chart or table that reads clearly at a glance.", tools:[{k:"r",t:"R Studio"},{k:"py",t:"Python"},{k:"pbi",t:"Power BI"},{k:"tab",t:"Tableau"},{k:"xl",t:"Excel"}]},
+    {n:6, title:"Report & Share", desc:"Deliver a static report, a live dashboard, or a shared file, depending on the audience.", tools:[{k:"pbi",t:"Power BI"},{k:"tab",t:"Tableau"},{k:"xl",t:"Excel"}]}
+  ];
+
+  const pillBg = {r:"#dbe9fb", py:"#fbead0", sql:"#fbdde8", pbi:"#fbe4d9", tab:"#d7f2d2", xl:"#d7f2e7"};
+  const pillFg = {r:"var(--r-color)", py:"#8a5a00", sql:"#a13a68", pbi:"#b04c22", tab:"#1f7a1f", xl:"#127a52"};
+
+  const lifecycleBody = document.getElementById('lifecycleBody');
+  stages.forEach((s, i) => {
+    const step = document.createElement('div');
+    step.className = 'step';
+    const toolsHtml = s.tools.map(t => `<span style="background:${pillBg[t.k]};color:${pillFg[t.k]}">${t.t}</span>`).join('');
+    step.innerHTML = `<div class="n">${s.n}</div><h4>${s.title}</h4><p>${s.desc}</p><div class="tools">${toolsHtml}</div>`;
+    lifecycleBody.appendChild(step);
+    if (i < stages.length - 1) {
+      const arrow = document.createElement('div');
+      arrow.className = 'arrow';
+      arrow.textContent = '→';
+      lifecycleBody.appendChild(arrow);
+    }
+  });
+</script>
+
+</body>
+</html>
